@@ -6,18 +6,16 @@ import pinoHttp from "pino-http";
 import { z } from "zod";
 import {
   cases, targets, devices, cells, networkEvents, anomalies, evidence,
-  auditEvents, users, roles, integrations
-} from "./data.js";
-import { adapters } from "./providers.js";
-import {
-  cases, targets, devices, cells, networkEvents, anomalies, evidence,
   auditEvents, users, roles, integrations,
   type AuditEvent
 } from "./data.js";
+import { adapters } from "./providers.js";
+
 let auditSeq = auditEvents.length;
 
 const log = pino({ level: process.env.LOG_LEVEL ?? "info" });
 const app = express();
+
 const allowedOrigins = (process.env.CORS_ORIGINS ?? "http://localhost:3000")
   .split(",")
   .map(s => s.trim())
@@ -37,6 +35,9 @@ app.use(pinoHttp({ logger: log }));
 
 const ok = <T>(data: T) => ({ ok: true, data });
 const err = (code: string, message: string) => ({ ok: false, error: { code, message } });
+
+// --- health ------------------------------------------------------------------
+app.get("/health", (_req, res) => res.json({ ok: true, uptime: process.uptime() }));
 
 // --- auth (demo) -------------------------------------------------------------
 const loginSchema = z.object({ authorizationId: z.string().min(1), password: z.string().min(1), caseRef: z.string().min(1) });
@@ -158,6 +159,7 @@ app.post("/api/audit/emit", (req, res) => {
   auditEvents.unshift(e);
   return res.status(201).json(ok(e));
 });
+
 // --- admin -------------------------------------------------------------------
 app.get("/api/admin/users", (_req, res) => res.json(ok(users.map(u => ({ ...u, roleName: roles.find(r => r.id === u.role)?.name ?? u.role })))));
 app.get("/api/admin/roles", (_req, res) => res.json(ok(roles)));
