@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import pino from "pino";
-import pinoHttp from "pino-http";
+import * as pinoHttpModule from "pino-http";
 import { z } from "zod";
 import {
   cases, targets, devices, cells, networkEvents, anomalies, evidence,
@@ -10,6 +10,13 @@ import {
   type AuditEvent
 } from "./data.js";
 import { adapters } from "./providers.js";
+
+type PinoHttpFn = (opts: { logger: unknown }) => import("express").RequestHandler;
+const pinoHttp = (
+  (pinoHttpModule as unknown as { default?: unknown }).default ??
+  (pinoHttpModule as unknown as { pinoHttp?: unknown }).pinoHttp ??
+  pinoHttpModule
+) as unknown as PinoHttpFn;
 
 let auditSeq = auditEvents.length;
 
