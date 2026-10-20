@@ -7,13 +7,20 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     cache: "no-store"
   });
   const body = await res.json();
-  if (!res.ok || body.ok === false) throw Object.assign(new Error(body?.error?.message ?? "Request failed"), { code: body?.error?.code, status: res.status });
+  if (!res.ok || body.ok === false) {
+    throw Object.assign(new Error(body?.error?.message ?? "Request failed"), {
+      code: body?.error?.code,
+      status: res.status
+    });
+  }
   return body.data as T;
 }
 
 export const api = {
-  login: (b: { authorizationId: string; password: string; caseRef: string }) => request<{ stage: string }>("/api/auth/login", { method: "POST", body: JSON.stringify(b) }),
-  mfa: (b: { code: string }) => request<{ session: any }>("/api/auth/mfa", { method: "POST", body: JSON.stringify(b) }),
+  login: (b: { authorizationId: string; password: string; caseRef: string }) =>
+    request<{ stage: string }>("/api/auth/login", { method: "POST", body: JSON.stringify(b) }),
+  mfa: (b: { code: string }) =>
+    request<{ session: any }>("/api/auth/mfa", { method: "POST", body: JSON.stringify(b) }),
   logout: () => request("/api/auth/logout", { method: "POST" }),
 
   cases: () => request<any[]>("/api/cases"),
@@ -35,6 +42,15 @@ export const api = {
 
   audit: () => request<any[]>("/api/audit"),
   auditOne: (id: string) => request<any>(`/api/audit/${id}`),
+  emitAudit: (b: {
+    action: string;
+    caseId?: string;
+    query?: string;
+    dataSource?: string;
+    authorization?: string;
+    result?: "success" | "denied" | "error";
+  }) =>
+    request<any>("/api/audit/emit", { method: "POST", body: JSON.stringify(b) }),
 
   adminUsers: () => request<any[]>("/api/admin/users"),
   adminRoles: () => request<any[]>("/api/admin/roles"),
@@ -43,9 +59,3 @@ export const api = {
 
   search: (q: string) => request<any>(`/api/search?q=${encodeURIComponent(q)}`)
 };
-
-emitAudit: (b: {
-  action: string; caseId?: string; query?: string;
-  dataSource?: string; authorization?: string;
-  result?: "success"|"denied"|"error";
-}) => request<any>("/api/audit/emit", { method: "POST", body: JSON.stringify(b) })
