@@ -1,34 +1,37 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { api } from "@/lib/api";
+import { createClient } from "@/lib/supabase/client";
 import { Lock } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [authorizationId, setA] = useState("A-102");
-  const [password, setP] = useState("Demo@2026");
-  const [caseRef, setC] = useState("CASE-2026-9941A");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function submit(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    try {
-      await api.login({ authorizationId, password, caseRef });
-      sessionStorage.setItem(
-        "pending-auth",
-        JSON.stringify({ authorizationId, caseRef })
-      );
-      router.push("/mfa");
-    } catch (e: any) {
-      setError(e.message ?? "Login failed");
-    } finally {
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setError(error.message);
       setLoading(false);
+      return;
     }
+
+    router.push("/dashboard");
+    router.refresh();
   }
 
   return (
@@ -41,49 +44,44 @@ export default function LoginPage() {
           </Link>
           <p className="blurb">
             Secure investigative operations platform. This is a demonstration prototype
-            using synthetic telecommunications records only. No live carrier systems are
-            accessed.
+            using synthetic telecommunications records only.
           </p>
         </div>
         <div className="status-row">
-          <span className="dot" /> SECURE ENVIRONMENT · DEMO
+          <span className="dot" /> SECURE ENVIRONMENT · SUPABASE AUTH
         </div>
       </aside>
 
       <main className="auth-form-side">
-        <form className="auth-card" onSubmit={submit}>
+        <form className="auth-card" onSubmit={handleLogin}>
           <h2>Access Request</h2>
           <p className="sub">Authorized personnel only. All actions are audited.</p>
 
           <div style={{ display: "grid", gap: 12 }}>
             <div className="field">
-              <label htmlFor="auth-id">Authorization ID</label>
+              <label htmlFor="email">Email</label>
               <input
-                id="auth-id"
-                className="input mono"
-                value={authorizationId}
-                onChange={e => setA(e.target.value)}
-                autoComplete="username"
+                id="email"
+                className="input"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                placeholder="Enter your email"
+                required
               />
             </div>
             <div className="field">
-              <label htmlFor="auth-pw">Password</label>
+              <label htmlFor="password">Password</label>
               <input
-                id="auth-pw"
+                id="password"
                 className="input"
                 type="password"
                 value={password}
-                onChange={e => setP(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="auth-case">Case / Warrant Reference</label>
-              <input
-                id="auth-case"
-                className="input mono"
-                value={caseRef}
-                onChange={e => setC(e.target.value)}
+                placeholder="Enter your password"
+                required
               />
             </div>
           </div>
@@ -92,15 +90,10 @@ export default function LoginPage() {
 
           <button type="submit" className="submit" disabled={loading}>
             <Lock size={13} />
-            {loading ? "Verifying…" : "Continue Securely"}
+            {loading ? "Verifying…" : "Sign In"}
           </button>
 
-          <div className="demo-block">
-            <div className="lbl">DEMO CREDENTIALS</div>
-            <div>
-              <code>A-102</code> · <code>Demo@2026</code> · <code>CASE-2026-9941A</code>
-            </div>
-          </div>
+         
         </form>
       </main>
     </div>
