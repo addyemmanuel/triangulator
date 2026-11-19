@@ -1821,7 +1821,15 @@ h3 { font-size: 13px; }
   .strip .cell { border-right: none; border-bottom: 1px solid var(--border); }
   .strip .cell:last-child { border-bottom: none; }
 }
-
+.icon {
+  display: inline-block;        /* required if it's a span/i */
+  width: 50px;
+  height: 50px;
+  background-image: url(./assets/image.png);
+  background-size: contain;      /* or cover / 100% 100% */
+  background-repeat: no-repeat;
+  background-position: center;
+}
 /* -------------------------------------------------------------------------
    24. RESPONSIVE — LANDING
    ------------------------------------------------------------------------- */

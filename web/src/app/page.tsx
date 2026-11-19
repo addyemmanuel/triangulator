@@ -444,6 +444,7 @@ export default function LandingPage() {
           <span className="name">IMEI TRIANGULATOR DEMO</span>
           <span className="tag">Investigative Intelligence</span>
         </div>
+        <div className="icon"></div>
         <div className="right">
           <span className="clock"><LiveClock /></span>
           <span className="adapter">
@@ -640,7 +641,10 @@ export default function LandingPage() {
       <footer className="landing-footer">
         <div className="inner">
           <span>IMEI TRIANGULATOR · Investigative Intelligence — demonstration prototype</span>
+           <div className="icon"></div>
           <span>All records synthetic · No carrier integration · Not for operational use</span>
+              
+            
         </div>
       </footer>
     </div>
