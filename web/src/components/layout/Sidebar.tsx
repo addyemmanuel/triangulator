@@ -16,6 +16,7 @@ const sections = [
   ]},
   { label: "INTELLIGENCE", items: [
     { href: "/intelligence/device", label: "Device Profiler", icon: Smartphone },
+    { href: "/intelligence/calls", label: "Call Detail Records", icon: RadioTower },
     { href: "/intelligence/identity", label: "Identity Linker", icon: Network },
     { href: "/intelligence/cells", label: "Cell-Site Mapping", icon: RadioTower }
   ]},
